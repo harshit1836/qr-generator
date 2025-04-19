@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>QR Scanner Page</title>
+</head>
+<body>
+  <h1>Welcome to QR Scanner</h1>
+  <p>Click below to share your location:</p>
+  <button onclick="shareLocation()">Share Location</button>
+
+  <script>
+    function shareLocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((position) => {
+          const latitude = position.coords.latitude;
+          const longitude = position.coords.longitude;
+          const userAgent = navigator.userAgent;
+
+          fetch('/scan', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              qrId: '123456', // Static QR ID for test
+              latitude,
+              longitude,
+              userAgent
+            })
+          })
+          .then(res => res.json())
+          .then(data => alert(data.message))
+          .catch(err => console.error('Error:', err));
+        });
+      } else {
+        alert('Geolocation is not supported by your browser.');
+      }
+    }
+  </script>
+</body>
+</html>

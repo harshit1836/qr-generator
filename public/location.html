@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Location Page</title>
+</head>
+<body>
+  <h2>Getting your location...</h2>
+
+  <script>
+    navigator.geolocation.getCurrentPosition((position) => {
+      const { latitude, longitude } = position.coords;
+      const userAgent = navigator.userAgent;
+
+      fetch('/scan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          qrId: 'qr001',
+          latitude,
+          longitude,
+          userAgent
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        document.body.innerHTML = `<h3>${data.message}</h3>`;
+      })
+      .catch(err => {
+        document.body.innerHTML = `<p>Error sending location: ${err}</p>`;
+      });
+    });
+  </script>
+</body>
+</html>
