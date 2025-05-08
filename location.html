@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Location Capture Page</title>
+</head>
+<body>
+  <h2>Getting your location...</h2>
+  
+  <script>
+    // Get current position of user
+    navigator.geolocation.getCurrentPosition((position) => {
+      const { latitude, longitude } = position.coords;
+      const userAgent = navigator.userAgent;
+
+      // Send location data to backend
+      fetch('http://localhost:3000/scan', { // Backend URL here
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          qrId: 'qr001', // Replace with actual QR ID
+          latitude,
+          longitude,
+          userAgent
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        // Success: Show message and redirect to Google Maps
+        document.body.innerHTML = `<h3>${data.message}</h3>`;
+        
+        // Redirect user to Google Maps with their location
+        const googleMapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
+        setTimeout(() => {
+          window.location.href = googleMapsUrl;
+        }, 2000); // Redirect after 2 seconds
+      })
+      .catch(err => {
+        document.body.innerHTML = `<p>Error sending location: ${err}</p>`;
+      });
+    }, (error) => {
+      document.body.innerHTML = `<p>Error getting location: ${error.message}</p>`;
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>QR Scan Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+    }
+    input {
+      padding: 8px;
+      width: 200px;
+      margin-bottom: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+    th {
+      background-color: #f4f4f4;
+    }
+    tr:hover {
+      background-color: #f1f1f1;
+    }
+  </style>
+</head>
+<body>
+  <h1>📊 QR Scan Dashboard</h1>
+  <input type="text" id="qrIdInput" placeholder="Enter QR ID to filter..." />
+
+  <table>
+    <thead>
+      <tr>
+        <th>QR ID</th>
+        <th>Latitude</th>
+        <th>Longitude</th>
+        <th>User Agent</th>
+        <th>Timestamp</th>
+      </tr>
+    </thead>
+    <tbody id="scanTableBody"></tbody>
+  </table>
+
+  <script>
+    const input = document.getElementById('qrIdInput');
+    const tableBody = document.getElementById('scanTableBody');
+
+    async function fetchScans() {
+      try {
+        const res = await fetch('/api/scans');
+        const data = await res.json();
+        return data;
+      } catch (err) {
+        console.error('Error fetching scan data:', err);
+        return [];
+      }
+    }
+
+    function displayScans(scans, filter = '') {
+      tableBody.innerHTML = '';
+      scans
+        .filter(scan => scan.qrId.includes(filter))
+        .forEach(scan => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${scan.qrId}</td>
+            <td>${scan.location.latitude}</td>
+            <td>${scan.location.longitude}</td>
+            <td>${scan.userAgent}</td>
+            <td>${new Date(scan.timestamp).toLocaleString()}</td>
+          `;
+          tableBody.appendChild(row);
+        });
+    }
+
+    async function initDashboard() {
+      const scans = await fetchScans();
+      displayScans(scans);
+
+      input.addEventListener('input', () => {
+        displayScans(scans, input.value);
+      });
+    }
+
+    initDashboard();
+  </script>
+</body>
+</html>
